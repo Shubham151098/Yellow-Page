@@ -1,0 +1,21 @@
+// import 'package:flutter/material.dart';
+// import 'package:yellowpage/consts/colors.dart';
+// import 'package:yellowpage/model/events.dart';
+
+// class EventDetails extends StatelessWidget {
+//   const EventDetails({super.key, required this.events});
+//   final Events events;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: Text('Events Details')),
+//       body: Container(
+//         color: lightGrey,
+//         child: const Center(
+//           child: Text('details page'),
+//         ),
+//       ),
+//     );
+//   }
+// }

@@ -1,0 +1,95 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class EventRegistrationForm extends StatefulWidget {
+  const EventRegistrationForm({Key? key}) : super(key: key);
+
+  @override
+  State<EventRegistrationForm> createState() => _EventRegistrationFormState();
+}
+
+class _EventRegistrationFormState extends State<EventRegistrationForm> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  List<EventCategory> _eventCategory = [];
+  String _selectedEvents = "";
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEventCategory();
+  }
+
+  Future<void> fetchEventCategory() async {
+    final response = await http.get(Uri.parse('http://127.0.0.1:8000/api/eventcategorydetails'));
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      if (jsonData is List) {
+        setState(() {
+          _eventCategory = jsonData.map<EventCategory>((item) => EventCategory.fromJson(item)).toList();
+        });
+      }
+    } else {
+      // Handle error
+      print('Failed to fetch event categories');
+    }
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      final formData = _formKey.currentState!.save();
+      // Perform your form submission or API call here
+      // print(formData);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        // ... your code
+      ),
+      body: Container(
+        // ... your code
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ... your code
+
+                Column(
+                  children: _eventCategory.map((category) {
+                    return RadioListTile<String>(
+                      title: Text(category.eventCategory),
+                      value: category.eventCategory,
+                      groupValue: _selectedEvents,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedEvents = value!;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+
+                // ... your code
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class EventCategory {
+  final String eventCategory;
+
+  EventCategory({required this.eventCategory});
+
+  factory EventCategory.fromJson(Map<String, dynamic> json) {
+    final eventCategory = json['event_category'] != null ? json['event_category'] as String : '';
+    return EventCategory(eventCategory: eventCategory);
+  }
+}

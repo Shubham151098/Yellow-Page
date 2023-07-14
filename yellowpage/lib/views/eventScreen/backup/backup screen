@@ -1,0 +1,129 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:yellowpage/views/eventScreen/event_details.dart';
+import 'dart:convert';
+import '../../model/events.dart';
+import 'package:yellowpage/consts/consts.dart';
+import 'package:velocity_x/velocity_x.dart';
+
+class EventScreen extends StatefulWidget {
+  const EventScreen({super.key});
+
+  @override
+  State<EventScreen> createState() => _EventScreenState();
+}
+
+class _EventScreenState extends State<EventScreen> {
+  Future<List<Events>>? events;
+  final eventListKey = GlobalKey<_EventScreenState>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    events = getEventList();
+  }
+
+  Future<List<Events>> getEventList() async {
+    String url = "http://127.0.0.1:8000/api/events/eventsdetails";
+    final response = await http.get(Uri.parse(url));
+    final items = json.decode(response.body).cast<Map<String, dynamic>>();
+    List<Events> employees = items.map<Events>((json) {
+      return Events.fromJson(json);
+    }).toList();
+
+    return employees;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Scaffold(
+        key: eventListKey,
+        appBar: AppBar(
+          title: Text('Events List'),
+        ),
+        body: Container(
+          padding: const EdgeInsets.all(12),
+          color: lightGrey,
+          width: context.screenWidth,
+          height: context.screenHeight,
+          child: Center(
+            child: FutureBuilder<List<Events>>(
+              future: events,
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                // By default, show a loading spinner.
+                if (!snapshot.hasData) return CircularProgressIndicator();
+                // Render employee lists
+                return ListView.builder(
+                  itemCount: snapshot.data.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    var data = snapshot.data[index];
+                    return Card(
+                      child: ListTile(
+                        onTap: () {
+                          // Navigate to next Details Page
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      EventDetails(events: data)));
+                        },
+                        leading: const Icon(Icons.event_seat),
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              data.ename,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: Colors.red),
+                            ),
+                            Text(data.eaddress),
+                          ],
+                        ),
+                      ),
+                      // child: SizedBox(
+                      //   width: 300,
+                      //   height: 100,
+                      //   child: Container(
+                      //     padding: EdgeInsets.all(10),
+                      //     child: Column(
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       children: [
+                      //         Text(data.ename),
+                      //         10.heightBox,
+                      //         Row(
+                      //           mainAxisAlignment:
+                      //               MainAxisAlignment.spaceEvenly,
+                      //           children: [Text(data.edate), Text(data.etime)],
+                      //         ),
+                      //         10.heightBox,
+                      //         Text(data.eaddress)
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
+                    );
+
+                    // Card(
+                    //   child: ListTile(
+                    //     leading: Icon(Icons.event),
+                    //     title: Text(
+                    //       data.ename,
+                    //       style: TextStyle(fontSize: 20),
+                    //     ),
+                    //   ),
+                    // );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

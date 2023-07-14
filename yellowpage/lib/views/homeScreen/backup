@@ -1,0 +1,18 @@
+Future<void> _fetchFields() async {
+  try {
+    final response = await http.get(Uri.parse('your_api_endpoint'));
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      final List<Field> fields = List<Field>.from(jsonData.map((x) => Field.fromJson(x)));
+      setState(() {
+        _fields = fields;
+      });
+    } else {
+      // Handle API error
+      print('Failed to fetch fields. Error: ${response.statusCode}');
+    }
+  } catch (e) {
+    // Handle network or other errors
+    print('Failed to fetch fields. Error: $e');
+  }
+}
